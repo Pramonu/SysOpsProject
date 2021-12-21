@@ -1,0 +1,86 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+        "Resources": {
+           "MyVPC": {
+              "Type": "AWS::EC2::VPC",
+              "Properties": {
+                 "CidrBlock": "10.0.0.0/16",
+                 "EnableDnsSupport": "true",
+                 "EnableDnsHostnames": "true",
+                 "InstanceTenancy": "default"
+                            }
+                   },       
+            "InternetGateway": {
+              "Type": "AWS::EC2::InternetGateway"
+                    },
+            "VPCGatewayAttachment": {
+              "Type": "AWS::EC2::VPCGatewayAttachment",
+              "Properties": {
+                "VpcId": {"Ref" : "MyVPC"},
+                "InternetGatewayId": {"Ref" : "InternetGateway"}
+                            }
+                            },
+            "Sub1": {
+                "Type": "AWS::EC2::Subnet",
+                "Properties": {
+                   "AvailabilityZone": "us-west-2a",
+                   "VpcId": {"Ref" : "MyVPC"},
+                    "CidrBlock": "10.0.1.0/24",
+                    "MapPublicIpOnLaunch": "true"
+                              }
+                    }, 
+            "Sub2": {
+                "Type": "AWS::EC2::Subnet",
+                "Properties": {
+                    "AvailabilityZone": "us-west-2b",
+                    "VpcId": {"Ref" : "MyVPC"},
+                    "CidrBlock": "10.0.2.0/24",
+                    "MapPublicIpOnLaunch": "false"
+                        }
+                      },
+            "RouteTable": {
+                "Type": "AWS::EC2::RouteTable",
+                "Properties": {
+                "VpcId": {"Ref" : "MyVPC"}
+                              }
+                          },
+            "InternetRoute": {
+                "Type": "AWS::EC2::Route",
+                "DependsOn": "VPCGatewayAttachment",
+                "Properties": {
+                    "DestinationCidrBlock": "0.0.0.0/0",
+                    "GatewayId": {"Ref" : "InternetGateway"},
+                    "RouteTableId": {"Ref": "RouteTable"}
+                              }
+                            },
+            "Sub1RouteTableAssociation": {
+                "Type": "AWS::EC2::SubnetRouteTableAssociation",
+                "Properties": {
+                    "RouteTableId": {"Ref" : "RouteTable"},
+                    "SubnetId": {"Ref": "Sub1"}
+                              }
+                                        },
+            "Sub2RouteTableAssociation": {
+                "Type": "AWS::EC2::SubnetRouteTableAssociation",
+                "Properties": {
+                    "RouteTableId": {"Ref" : "RouteTable"},
+                    "SubnetId": {"Ref": "Sub2"}
+                              }
+                                         }
+                },
+
+        "Outputs": {
+            "VpcId": {
+                "Value": {"Ref":"MyVPC"},
+                "Export": {"Name": {"Fn::Sub": "${AWS::StackName}-VpcId"}}
+                    },
+            "PublicSubnetID": {
+                "Value": {"Ref":"Sub1"},
+                "Export": {"Name": {"Fn::Sub":"${AWS::StackName}-PublicSubnetID"}}
+                              },
+            "PrivateSubnetID":{
+                "Value": {"Ref":"Sub2"},
+                "Export": {"Name": {"Fn::Sub":"${AWS::StackName}-PrivateSubnetID"}}
+                              }                 
+                    }                             
+}

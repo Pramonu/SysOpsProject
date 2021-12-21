@@ -1,0 +1,20 @@
+---
+- hosts: tag_Name_PrivateLinux
+  connection: ssh
+  become: true
+  tasks:
+  - name: installing MySQL packages
+    apt: 
+     update_cache: yes
+     name: 
+       - mysql-server
+       - mysql-client
+       - python-mysqldb
+     state: present
+      
+    
+  - name: start the MySQL service
+    service: 
+      name: mysql
+      state: started
+      enabled: true
